@@ -1,0 +1,15 @@
+---
+collections:
+  - name: ansible.windows
+  - name: community.windows
+  - name: community.general
+
+roles:
+  - name: ubuntu24_cis
+    src: ansible-lockdown.ubuntu24_cis
+
+  - name: windows_10_cis
+    src: ansible-lockdown.windows_10_cis
+
+  - name: windows_2022_cis
+    src: ansible-lockdown.windows_2022_cis

@@ -1,0 +1,22 @@
+---
+project_name: soc-lab
+lab_timezone: Europe/Moscow
+wazuh_manager_ip: 192.168.31.227
+
+# Подключение: WinRM для группы Windows, SSH для остальных узлов.
+ansible_user: ansible
+ansible_connection: "{{ 'winrm' if 'windows_endpoint' in group_names else 'ssh' }}"
+ansible_port: "{{ 5985 if 'windows_endpoint' in group_names else 22 }}"
+ansible_become: false
+
+# Эти параметры используются только подключением WinRM.
+ansible_winrm_transport: ntlm
+ansible_winrm_scheme: http
+ansible_winrm_operation_timeout_sec: 60
+ansible_winrm_read_timeout_sec: 180
+
+# Сервис управления секретами.
+secret_service_base_url: "https://192.168.31.210:8443"
+secret_service_verify_tls: false
+secret_service_api_key_header: "X-API-Key"
+secret_service_read_endpoint: "/api/v1/secrets/{path}"

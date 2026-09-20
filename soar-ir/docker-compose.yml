@@ -1,0 +1,120 @@
+name: soar-core
+
+# Compose configuration skeleton.
+# Fill .env and add nginx/shuffle specific settings from your current setup.
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks: [frontend]
+
+  thehive:
+    image: strangebee/thehive:5.7.3
+    restart: unless-stopped
+    expose:
+      - "9000"
+    volumes:
+      - thehive_files:/data/files
+    networks:
+      - frontend
+      - backend
+      - shuffle_swarm_executions
+
+  cortex:
+    image: thehiveproject/cortex:4.0.1
+    restart: unless-stopped
+    privileged: true
+    command:
+      - --secret
+      - ${CORTEX_SECRET}
+      - --es-uri
+      - http://elasticsearch:9200
+      - --start-docker
+      - --job-directory
+      - /tmp/cortex-jobs
+    volumes:
+      - cortex_jobs:/tmp/cortex-jobs
+      - cortex_docker:/var/lib/docker
+      - ./cortex/application.conf:/opt/cortex/conf/application.conf:ro
+    expose:
+      - "9001"
+    networks:
+      - frontend
+      - backend
+      - shuffle_swarm_executions
+
+  cassandra:
+    image: cassandra:4.1
+    restart: unless-stopped
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - backend
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.4
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms2g -Xmx2g"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - backend
+
+  shuffle-backend:
+    image: ghcr.io/shuffle/shuffle-backend:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - frontend
+      - shuffle
+      - shuffle_swarm_executions
+
+  shuffle-frontend:
+    image: ghcr.io/shuffle/shuffle-frontend:latest
+    restart: unless-stopped
+    networks:
+      - frontend
+      - shuffle
+
+  shuffle-orborus:
+    image: ghcr.io/shuffle/shuffle-orborus:latest
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT_NAME: Shuffle
+      SHUFFLE_SWARM_CONFIG: run
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - shuffle
+      - shuffle_swarm_executions
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+  shuffle:
+    driver: bridge
+  shuffle_swarm_executions:
+    driver: overlay
+    attachable: true
+
+volumes:
+  thehive_files:
+  cortex_jobs:
+  cortex_docker:
+  cassandra_data:
+  elasticsearch_data:
+  shuffle_database:

@@ -1,0 +1,12 @@
+---
+asset_role: soar_host
+criticality: high
+cis_profile: L1
+ansible_password: "{{ lookup('secret_service', 'ansible/hosts/soar-ir/ssh/password') }}"
+ansible_become_password: "{{ ansible_password }}"
+ansible_user: ansible
+
+ansible_ssh_common_args: "-o PubkeyAuthentication=no -o PreferredAuthentications=password -o NumberOfPasswordPrompts=1 -o IdentitiesOnly=yes"
+
+
+

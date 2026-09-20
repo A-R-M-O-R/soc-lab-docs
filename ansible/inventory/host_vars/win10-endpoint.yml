@@ -1,0 +1,21 @@
+---
+asset_role: top_manager_workstation
+criticality: high
+
+ansible_host: 192.168.31.236
+ansible_user: ansible
+ansible_password: "{{ lookup('secret_service', 'ansible/hosts/win10-endpoint/winrm/password') }}"
+ansible_become: false
+
+firewall_ansible_source_ip: "192.168.31.110"
+firewall_local_org_subnet: "192.168.31.0/24"
+
+wazuh_manager_ip: "192.168.31.227"
+
+app_secrets_ip: "192.168.31.210"
+app_secrets_ports: "8080,8443"
+
+firewall_allow_rdp: false
+firewall_block_lolbins_outbound: true
+
+top_manager_username: "manager"

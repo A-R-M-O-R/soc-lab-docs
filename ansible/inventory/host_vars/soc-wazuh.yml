@@ -1,0 +1,13 @@
+---
+asset_role: wazuh_core
+criticality: high
+
+ansible_password: "{{ lookup('secret_service', 'ansible/hosts/soc-wazuh/ssh/password') }}"
+ansible_become_password: "{{ ansible_password }}"
+
+required_ports:
+  - 22
+  - 443
+  - 1514
+  - 1515
+  - 55000
